@@ -13,7 +13,8 @@ printf '%s\n' 'Installing Termux MCP requirements...'
 pkg update -y
 pkg install -y python proot resolv-conf curl unzip
 
-python -m pip install --upgrade pip
+# Termux manages pip through its own package manager. Upgrading pip with pip
+# itself is forbidden because it can break the python-pip package.
 python -m pip install -r "$ROOT_DIR/requirements.txt"
 
 ARCH="$(uname -m)"
