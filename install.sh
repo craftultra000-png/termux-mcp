@@ -29,9 +29,11 @@ esac
 if [[ ! -x "$NGROK" ]] || ! "$NGROK" version >/dev/null 2>&1; then
     TMP_DIR="$(mktemp -d)"
     trap 'rm -rf "$TMP_DIR"' EXIT
-    URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-${NGROK_ARCH}.zip"
+    URL="${NGROK_DOWNLOAD_URL:-https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-${NGROK_ARCH}.zip}"
     printf 'Downloading ngrok for %s...\n' "$ARCH"
-    curl -fL --retry 3 "$URL" -o "$TMP_DIR/ngrok.zip"
+    curl -fL --retry 10 --retry-all-errors --retry-delay 5 \
+        --connect-timeout 30 --max-time 3600 -C - "$URL" \
+        -o "$TMP_DIR/ngrok.zip"
     unzip -o "$TMP_DIR/ngrok.zip" -d "$TMP_DIR"
     install -m 755 "$TMP_DIR/ngrok" "$NGROK"
 fi
