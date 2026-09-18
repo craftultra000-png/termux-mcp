@@ -45,6 +45,11 @@ printf 'Create or copy your token from https://dashboard.ngrok.com/get-started/y
 read -r -s -p 'Enter your ngrok Authtoken: ' TOKEN
 printf '\n'
 [[ -n "$TOKEN" ]] || { printf 'Token cannot be empty.\n' >&2; exit 1; }
+if [[ ! "$TOKEN" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    printf 'Invalid Authtoken format. Paste only the token, without spaces or commands.\n' >&2
+    unset TOKEN
+    exit 1
+fi
 "$NGROK" config add-authtoken "$TOKEN"
 unset TOKEN
 
