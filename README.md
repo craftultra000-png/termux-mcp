@@ -14,7 +14,7 @@ An AI agent sends a task through MCP. Termux MCP delivers the agent's shell
 work to the Android phone, where the command runs in the user's Termux
 environment and the result is returned to the agent.
 
-![AI agent working with Termux through MCP](assets/i-agent-termux-flow.png)
+![AI agent working with Termux through MCP](assets/agent-termux-flow.png)
 
 ```text
 AI agent → MCP URL → ngrok tunnel → Termux MCP server → Bash in Termux
