@@ -1,0 +1,55 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -Eeuo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NGROK="$ROOT_DIR/ngrok"
+
+if [[ "${PREFIX:-}" != *"com.termux"* ]]; then
+    printf 'This installer must be run inside Termux.\n' >&2
+    exit 1
+fi
+
+printf '%s\n' 'Installing Termux MCP requirements...'
+pkg update -y
+pkg install -y python proot resolv-conf curl unzip
+
+python -m pip install --upgrade pip
+python -m pip install -r "$ROOT_DIR/requirements.txt"
+
+ARCH="$(uname -m)"
+case "$ARCH" in
+    aarch64) NGROK_ARCH="arm64" ;;
+    armv7l|armv8l|arm) NGROK_ARCH="arm" ;;
+    x86_64) NGROK_ARCH="amd64" ;;
+    i686|i386) NGROK_ARCH="386" ;;
+    *) printf 'Unsupported Android architecture: %s\n' "$ARCH" >&2; exit 1 ;;
+esac
+
+if [[ ! -x "$NGROK" ]] || ! "$NGROK" version >/dev/null 2>&1; then
+    TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$TMP_DIR"' EXIT
+    URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-${NGROK_ARCH}.zip"
+    printf 'Downloading ngrok for %s...\n' "$ARCH"
+    curl -fL --retry 3 "$URL" -o "$TMP_DIR/ngrok.zip"
+    unzip -o "$TMP_DIR/ngrok.zip" -d "$TMP_DIR"
+    install -m 755 "$TMP_DIR/ngrok" "$NGROK"
+fi
+
+printf '\nngrok Authtoken setup\n'
+printf 'Create or copy your token from https://dashboard.ngrok.com/get-started/your-authtoken\n'
+read -r -s -p 'Enter your ngrok Authtoken: ' TOKEN
+printf '\n'
+[[ -n "$TOKEN" ]] || { printf 'Token cannot be empty.\n' >&2; exit 1; }
+"$NGROK" config add-authtoken "$TOKEN"
+unset TOKEN
+
+chmod +x "$ROOT_DIR/tmcp.sh"
+INSTALL_BIN="$PREFIX/bin/tmcp"
+cat > "$INSTALL_BIN" <<EOF
+#!/data/data/com.termux/files/usr/bin/bash
+exec "$ROOT_DIR/tmcp.sh" "\$@"
+EOF
+chmod 755 "$INSTALL_BIN"
+
+printf '\nInstallation complete. Start the bridge with:\n  tmcp\n\n'
+printf 'The MCP URL will be printed after ngrok connects.\n'
