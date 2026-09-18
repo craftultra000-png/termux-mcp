@@ -38,6 +38,8 @@ if [[ ! -x "$NGROK" ]] || ! "$NGROK" version >/dev/null 2>&1; then
     install -m 755 "$TMP_DIR/ngrok" "$NGROK"
 fi
 
+[[ -x "$NGROK" ]] || { printf 'ngrok installation failed: %s\n' "$NGROK" >&2; exit 1; }
+
 printf '\nngrok Authtoken setup\n'
 printf 'Create or copy your token from https://dashboard.ngrok.com/get-started/your-authtoken\n'
 read -r -s -p 'Enter your ngrok Authtoken: ' TOKEN
@@ -54,5 +56,6 @@ exec "$ROOT_DIR/tmcp.sh" "\$@"
 EOF
 chmod 755 "$INSTALL_BIN"
 
+"$NGROK" version >/dev/null 2>&1 || { printf 'ngrok was installed but could not be executed.\n' >&2; exit 1; }
 printf '\nInstallation complete. Start the bridge with:\n  tmcp\n\n'
 printf 'The MCP URL will be printed after ngrok connects.\n'

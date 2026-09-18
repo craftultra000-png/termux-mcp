@@ -26,8 +26,13 @@ fail() {
     exit 1
 }
 
-command -v python >/dev/null 2>&1 || fail "Python is not installed. Run ./install.sh first."
-[[ -x "$NGROK_BIN" ]] || fail "ngrok is missing or not executable. Run ./install.sh first."
+command -v python >/dev/null 2>&1 || fail "Python is not installed. Run: pkg install python"
+if [[ ! -f "$NGROK_BIN" ]]; then
+    fail "ngrok was not found at $NGROK_BIN. Run: cd \"$SCRIPT_DIR\" && ./install.sh"
+fi
+if [[ ! -x "$NGROK_BIN" ]]; then
+    chmod +x "$NGROK_BIN" 2>/dev/null || fail "ngrok exists but cannot be made executable: $NGROK_BIN"
+fi
 mkdir -p "$LOG_DIR"
 
 printf '%s\n' '========================================'

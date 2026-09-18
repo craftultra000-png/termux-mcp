@@ -1,5 +1,7 @@
 # Termux MCP
 
+![Termux MCP — Termux, MCP, and AI Agent](assets/termux-mcp-banner.png)
+
 **Termux MCP** turns an Android phone running Termux into a remote execution environment for Claude Code, Codex-style tools, and other AI agents that support the Model Context Protocol (MCP).
 
 The project runs a small MCP server inside Termux and exposes one deliberate capability: a full Bash shell for the current Termux user. The connected agent can inspect files, edit projects, install packages, run tests, use Git, and work with the tools already available on the phone.
@@ -40,6 +42,8 @@ After installation, start the bridge from any Termux directory with:
 ```bash
 tmcp
 ```
+
+The `tmcp` command uses the project directory recorded during installation, so it can be run from `~` or any other working directory.
 
 The script prints an MCP URL similar to:
 
