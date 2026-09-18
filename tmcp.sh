@@ -48,7 +48,8 @@ kill -0 "$NGROK_PID" 2>/dev/null || fail "ngrok failed to start. See $NGROK_LOG"
 
 MCP_URL=""
 for _ in {1..10}; do
-    MCP_URL="$(grep -oE 'https://[^[:space:]"'"'"']+' "$NGROK_LOG" | head -n 1 || true)"
+    # ngrok logs also contain update URLs. Match only public tunnel domains.
+    MCP_URL="$(grep -oE 'https://[A-Za-z0-9.-]+\.ngrok(-free)?\.(app|dev|io)' "$NGROK_LOG" | head -n 1 || true)"
     [[ -n "$MCP_URL" ]] && break
     sleep 1
 done
