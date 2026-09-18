@@ -49,10 +49,22 @@ printf '\n'
 unset TOKEN
 
 chmod +x "$ROOT_DIR/tmcp.sh"
+# Remove legacy wrappers from earlier development installs. They can appear
+# before $PREFIX/bin in PATH and point to a stale ~/.termux/bin/ngrok path.
+for LEGACY_BIN in "$HOME/.termux/bin/tmcp" "$HOME/bin/tmcp"; do
+    if [[ -f "$LEGACY_BIN" ]] && grep -q 'termux-mcp\|tmcp.sh' "$LEGACY_BIN" 2>/dev/null; then
+        rm -f "$LEGACY_BIN"
+    fi
+done
 INSTALL_BIN="$PREFIX/bin/tmcp"
 cat > "$INSTALL_BIN" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
-exec "$ROOT_DIR/tmcp.sh" "\$@"
+set -e
+PROJECT_DIR="$ROOT_DIR"
+if [[ ! -f "\$PROJECT_DIR/tmcp.sh" && -f "\$HOME/termux-mcp/tmcp.sh" ]]; then
+    PROJECT_DIR="\$HOME/termux-mcp"
+fi
+exec "\$PROJECT_DIR/tmcp.sh" "\$@"
 EOF
 chmod 755 "$INSTALL_BIN"
 
